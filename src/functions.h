@@ -18,18 +18,35 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t welengt
   {
     byte separator = payloadString.indexOf('=');
     String var = payloadString.substring(0, separator);
-    Serial.print("var= ");
-    Serial.println(var);
     String val = payloadString.substring(separator + 1);
-    Serial.print("val= ");
-    Serial.println(val);
-    Serial.println(" ");
 
-    if (var == "LEDonoff")
-    {
-      LEDonoff = false;
+
+    if (var == "LED_0_onoff") {
       if (val == "ON")
-        LEDonoff = true;
+        LED_0_onoff = true;
+      else
+        LED_0_onoff = false;
+    }
+
+    if (var == "LED_1_onoff") {
+      if (val == "ON")
+        LED_1_onoff = true;
+      else
+        LED_1_onoff = false;
+    }
+
+    if (var == "LED_2_onoff") {
+      if (val == "ON")
+        LED_2_onoff = true;
+      else
+        LED_2_onoff = false;
+    }
+
+    if (var == "LED_3_onoff") {
+      if (val == "ON")
+        LED_3_onoff = true;
+      else
+        LED_3_onoff = false;
     }
   }
 }
