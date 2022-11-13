@@ -24,13 +24,20 @@ const char *password = "84694339";
 #define BUTTON_2 2
 #define BUTTON_3 15
 //-----------------------------------------------
+// INIT WEB SERVER
 WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 //-----------------------------------------------
+// SET BUTTON, LED & JSON VARIABLES
 boolean LED_0_onoff = false;
 boolean LED_1_onoff = false;
 boolean LED_2_onoff = false;
 boolean LED_3_onoff = false;
+boolean BUTTON_0_onoff = false;
+boolean BUTTON_1_onoff = false;
+boolean BUTTON_2_onoff = false;
+boolean BUTTON_3_onoff = false;
+boolean LOCK_PLAYER = false;
 String JSONtxt;
 //-----------------------------------------------
 #include "dashboard.h"
@@ -38,7 +45,10 @@ String JSONtxt;
 //====================================================================
 void setup()
 {
+  // SERIAL OUTPUT
   Serial.begin(115200);
+  
+  // SET UP ALL PINMODES
   pinMode(LED_0, OUTPUT);
   pinMode(LED_1, OUTPUT);
   pinMode(LED_2, OUTPUT);
@@ -48,7 +58,9 @@ void setup()
   pinMode(BUTTON_1, INPUT_PULLUP);
   pinMode(BUTTON_2, INPUT_PULLUP);
   pinMode(BUTTON_3, INPUT_PULLUP);
+
   //-----------------------------------------------
+  // START WIFI
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -60,60 +72,78 @@ void setup()
   Serial.print("Local IP: ");
   Serial.println(WiFi.localIP());
   //-----------------------------------------------
+  // SET WEBSERVER ROUTE
   server.on("/", webpage);
-  //-----------------------------------------------
   server.begin();
+  //-----------------------------------------------
+  // INIT WEBSOKETS
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
 }
+
+
+
 //====================================================================
 void loop()
 {
+  BUTTON_0_onoff = !digitalRead(BUTTON_0);
+  BUTTON_1_onoff = !digitalRead(BUTTON_1);
+  BUTTON_2_onoff = !digitalRead(BUTTON_2);
+  BUTTON_3_onoff = !digitalRead(BUTTON_3);
+
+
+  //-----------------------------------------------
+  // STATUS EVALUATION
+  isOnorOffButton(BUTTON_0_onoff, LED_0_onoff);
+  isOnorOffButton(BUTTON_1_onoff, LED_1_onoff);
+  isOnorOffButton(BUTTON_2_onoff, LED_2_onoff);
+  isOnorOffButton(BUTTON_3_onoff, LED_3_onoff);
+ 
+  // MAKE ROUNDTRIP TO WEBSOCKET DATA
   webSocket.loop();
   server.handleClient();
-  //-----------------------------------------------
-  if (LED_0_onoff == false)
-    digitalWrite(LED_0, LOW);
-  else
-    digitalWrite(LED_0, HIGH);
-  
-  if (LED_1_onoff == false)
-    digitalWrite(LED_1, LOW);
-  else
-    digitalWrite(LED_1, HIGH);
-  
-  if (LED_2_onoff == false)
-    digitalWrite(LED_2, LOW);
-  else
-    digitalWrite(LED_2, HIGH);
-  
-  if (LED_3_onoff == false)
-    digitalWrite(LED_3, LOW);
-  else
-    digitalWrite(LED_3, HIGH);
+
+  // EVALUATE LED
+  isOnorOffLED(LED_0_onoff, LED_0);
+  isOnorOffLED(LED_1_onoff, LED_1);
+  isOnorOffLED(LED_2_onoff, LED_2);
+  isOnorOffLED(LED_3_onoff, LED_3);
+
   //-----------------------------------------------
   String LED_0_status = "OFF";
   String LED_1_status = "OFF";
   String LED_2_status = "OFF";
   String LED_3_status = "OFF";
-
-  if (LED_0_onoff == true)
-    LED_0_status = "ON";
   
-  if (LED_0_onoff == true)
-    LED_1_status = "ON";
+  String BUTTON_0_status = "OFF";
+  String BUTTON_1_status = "OFF";
+  String BUTTON_2_status = "OFF";
+  String BUTTON_3_status = "OFF";
 
-  if (LED_0_onoff == true)
-    LED_2_status = "ON";
+  String LOCK_PLAYER_status = "OFF";
 
-  if (LED_0_onoff == true)
-    LED_3_status = "ON";
+  isOnorOffJSON(LED_0_onoff, LED_0_status);
+  isOnorOffJSON(LED_0_onoff, LED_0_status);
+  isOnorOffJSON(LED_0_onoff, LED_0_status);
+  isOnorOffJSON(LED_0_onoff, LED_0_status);
+  isOnorOffJSON(BUTTON_0_onoff, BUTTON_0_status);
+  isOnorOffJSON(BUTTON_1_onoff, BUTTON_1_status);
+  isOnorOffJSON(BUTTON_2_onoff, BUTTON_2_status);
+  isOnorOffJSON(BUTTON_3_onoff, BUTTON_3_status);
+  isOnorOffJSON(LOCK_PLAYER, LOCK_PLAYER_status);
   
   JSONtxt = "{"
     "\"LED_0_onoff\": \"" + LED_0_status + "\","
     "\"LED_1_onoff\": \"" + LED_1_status + "\","
     "\"LED_2_onoff\": \"" + LED_2_status + "\","
     "\"LED_3_onoff\": \"" + LED_3_status + "\","
+    "\"BUTTON_0_onoff\": \"" + BUTTON_0_status + "\","
+    "\"BUTTON_1_onoff\": \"" + BUTTON_1_status + "\","
+    "\"BUTTON_2_onoff\": \"" + BUTTON_2_status + "\","
+    "\"BUTTON_3_onoff\": \"" + BUTTON_3_status + "\","
+    "\"LOCK_PLAYER\": \"" + LOCK_PLAYER_status + "\""
     "}";
+
   webSocket.broadcastTXT(JSONtxt);
+  delay(1);
 }

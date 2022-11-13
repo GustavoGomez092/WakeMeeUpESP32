@@ -48,5 +48,47 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t welengt
       else
         LED_3_onoff = false;
     }
+
+    if (var == "LOCK_PLAYER") {
+      if (val == "ON")
+        LOCK_PLAYER = true;
+      else
+        LOCK_PLAYER = false;
+    }
+
   }
+}
+
+//=====================================================
+// BUTTON PRESS TO TURN ON LED
+//=====================================================
+void isOnorOffButton(bool device, bool& led) {
+  if(!LOCK_PLAYER) {
+    if(device) {
+      led = true;
+    } else {
+      led = false;
+    }
+  }
+}
+
+//=====================================================
+// LED STATUS TO PIN VOLTAGE FUNCTION
+//=====================================================
+void isOnorOffLED(bool device, int pin) {
+  if(device == false){
+    digitalWrite(pin, LOW);
+
+  } else{
+    digitalWrite(pin, HIGH);
+
+  }
+}
+
+//=====================================================
+// JSON STATUS EVAL FUNCTION
+//=====================================================
+void isOnorOffJSON(bool device, String& status) {
+  if (device == true)
+    status = "ON";
 }
