@@ -1,3 +1,21 @@
+//=====================================================
+// SOUND EFFECTS
+//=====================================================
+void successSound() {
+  if (buzzer.getState() == BUZZER_IDLE) {
+    int length = sizeof(successTime) / sizeof(int);
+    buzzer.playMelody(successNotes, successTime, length);
+    SUCCESS_SFX = false;
+  }
+}
+
+void errorSound() {
+  if (buzzer.getState() == BUZZER_IDLE) {
+    int length = sizeof(errorTime) / sizeof(int);
+    buzzer.playMelody(errorNotes, errorTime, length);
+    ERROR_SFX = false;
+  }
+}
 //=======================================
 // handle function: send webpage to client
 //=======================================
@@ -56,6 +74,16 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t welengt
         LOCK_PLAYER = false;
     }
 
+    if (var == "SUCCESS_SFX") {
+      if (val == "ON")
+        successSound();
+    }
+
+    if (var == "ERROR_SFX") {
+      if (val == "ON")
+        errorSound();
+    }
+
   }
 }
 
@@ -65,7 +93,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t welengt
 void isOnorOffButton(bool device, bool& led) {
   if(!LOCK_PLAYER) {
     if(device) {
-      led = true;
+      led = true;      
     } else {
       led = false;
     }

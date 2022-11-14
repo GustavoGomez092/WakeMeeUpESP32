@@ -6,6 +6,7 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
+#include <ezBuzzer.h>
 //-----------------------------------------------
 const char *ssid = "Casa_2.4GHz";
 const char *password = "84694339";
@@ -23,6 +24,9 @@ const char *password = "84694339";
 #define BUTTON_1 4
 #define BUTTON_2 2
 #define BUTTON_3 15
+
+// DEFINE BUZZER
+#define BUZZER 21
 //-----------------------------------------------
 // INIT WEB SERVER
 WebServer server(80);
@@ -38,11 +42,20 @@ boolean BUTTON_1_onoff = false;
 boolean BUTTON_2_onoff = false;
 boolean BUTTON_3_onoff = false;
 boolean LOCK_PLAYER = false;
+boolean SUCCESS_SFX = false;
+boolean ERROR_SFX = false;
 String JSONtxt;
+
+//SET BUZZER OBJECT
+ezBuzzer buzzer(BUZZER);
+
 //-----------------------------------------------
 #include "dashboard.h"
+#include "melodies.h"
 #include "functions.h"
 //====================================================================
+
+
 void setup()
 {
   // SERIAL OUTPUT
@@ -102,6 +115,9 @@ void loop()
   // MAKE ROUNDTRIP TO WEBSOCKET DATA
   webSocket.loop();
   server.handleClient();
+  
+  // BUZZER LOOP
+  buzzer.loop();
 
   // EVALUATE LED
   isOnorOffLED(LED_0_onoff, LED_0);
@@ -122,6 +138,9 @@ void loop()
 
   String LOCK_PLAYER_status = "OFF";
 
+  String SUCCESS_SFX_status = "OFF";
+  String ERROR_SFX_status = "OFF";
+
   isOnorOffJSON(LED_0_onoff, LED_0_status);
   isOnorOffJSON(LED_0_onoff, LED_0_status);
   isOnorOffJSON(LED_0_onoff, LED_0_status);
@@ -131,6 +150,8 @@ void loop()
   isOnorOffJSON(BUTTON_2_onoff, BUTTON_2_status);
   isOnorOffJSON(BUTTON_3_onoff, BUTTON_3_status);
   isOnorOffJSON(LOCK_PLAYER, LOCK_PLAYER_status);
+  isOnorOffJSON(SUCCESS_SFX, SUCCESS_SFX_status);
+  isOnorOffJSON(ERROR_SFX, ERROR_SFX_status);
   
   JSONtxt = "{"
     "\"LED_0_onoff\": \"" + LED_0_status + "\","
@@ -141,7 +162,9 @@ void loop()
     "\"BUTTON_1_onoff\": \"" + BUTTON_1_status + "\","
     "\"BUTTON_2_onoff\": \"" + BUTTON_2_status + "\","
     "\"BUTTON_3_onoff\": \"" + BUTTON_3_status + "\","
-    "\"LOCK_PLAYER\": \"" + LOCK_PLAYER_status + "\""
+    "\"LOCK_PLAYER\": \"" + LOCK_PLAYER_status + "\","
+    "\"SUCCESS_SFX\": \"" + SUCCESS_SFX_status + "\","
+    "\"ERROR_SFX\": \"" + ERROR_SFX_status + "\""
     "}";
 
   webSocket.broadcastTXT(JSONtxt);
